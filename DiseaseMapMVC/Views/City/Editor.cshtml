@@ -1,0 +1,62 @@
+﻿@inject IViewLocalizer Localizer
+
+@model CityViewModel;
+
+<link href="~/css/myStyles/errorMessage.css" rel="stylesheet" />
+
+<script src="https://stackpath.bootstrapcdn.com/bootstrap/4.5.2/js/bootstrap.min.js"></script>
+<script src="~/lib/jquery-validation/dist/jquery.validate.min.js"></script>
+<script src="~/lib/jquery-validation-unobtrusive/jquery.validate.unobtrusive.min.js"></script>
+
+@using (Html.BeginForm("Save", "City", FormMethod.Post, new { id = "editForm", @class = "modal-content form-horizontal", role = "form" }))
+{
+    <div class="modal-header">
+        <h4>@Localizer["CityParameters"]</h4>
+        <button id="closeButton" class="close" data-dismiss="modal" area-hidden="true">X</button>
+    </div>
+    <hr />
+
+    @Html.HiddenFor(model => model.Id)
+    @Html.HiddenFor(model => model.CountryId)
+
+    <div class="form-group">
+        @Html.LabelFor(m => m.Name, new { @class = "col-md-6 control-label" })
+        @Html.ValidationMessageFor(m => m.Name)
+        <div class="col-md-10">
+            @Html.TextBoxFor(m => m.Name, new { @class = "form-control" })
+        </div>
+    </div>
+    <div class="form-group">
+        @Html.LabelFor(m => m.KidNumber, new { @class = "col-md-6 control-label" })
+        @Html.ValidationMessageFor(m => m.KidNumber)
+        <div class="col-md-10">
+            @Html.TextBoxFor(m => m.KidNumber, new { @class = "form-control" })
+        </div>
+    </div>
+    <div class="form-group">
+        @Html.LabelFor(m => m.AdolescentNumber, new { @class = "col-md-6 control-label" })
+        @Html.ValidationMessageFor(m => m.AdolescentNumber)
+        <div class="col-md-10">
+            @Html.TextBoxFor(m => m.AdolescentNumber, new { @class = "form-control" })
+        </div>
+    </div>
+    <div class="form-group">
+        @Html.LabelFor(m => m.AdultNumber, new { @class = "col-md-6 control-label" })
+        @Html.ValidationMessageFor(m => m.AdultNumber)
+        <div class="col-md-10">
+            @Html.TextBoxFor(m => m.AdultNumber, new { @class = "form-control" })
+        </div>
+    </div>
+    <div class="form-group">
+        @Html.LabelFor(m => m.RetireeNumber, new { @class = "col-md-6 control-label" })
+        @Html.ValidationMessageFor(m => m.RetireeNumber)
+        <div class="col-md-10">
+            @Html.TextBoxFor(m => m.RetireeNumber, new { @class = "form-control" })
+        </div>
+    </div>
+    <div class="form-group">
+        <div class="col-md-offset-2 col-md-10">
+            <input type="submit" class="btn btn-success btn-default" value="@Localizer["Save"]" />
+        </div>
+    </div>
+}

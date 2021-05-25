@@ -1,0 +1,102 @@
+﻿@inject IViewLocalizer Localizer
+
+@model CountryEpidemic
+
+@{
+    ViewData["Title"] = "City Epidemic Parameters";
+}
+
+<link href="~/css/myStyles/table.css" rel="stylesheet" />
+
+@using (Html.BeginForm())
+{
+    @Html.AntiForgeryToken()
+
+    <div class="form-horizontal">
+        <div class="form-group">
+            <div class="col-md-12">
+                <div class="text-center">
+                    <h3 class="badge badge-info">@Localizer["Header"]</h3>
+                </div>
+
+                <table class="table table-condensed table-hover">
+                    <tr>
+                        <th style="display: none">
+                            Id
+                        </th>
+                        <th>
+                            @Localizer["CityName"]
+                        </th>
+                        <th>
+                            @Localizer["Sick"]
+                        </th>
+                        <th>
+                            @Localizer["Injured"]
+                        </th>
+                        <th>
+                            @Localizer["VaccinatedPerDay"]
+                        </th>
+                        <th>
+                            @Localizer["ClosePublicTransport"]
+                        </th>
+                        <th>
+                            @Localizer["CloseSchools"]
+                        </th>
+                        <th>
+                            @Localizer["CloseKindergarten"]
+                        </th>
+                        <th>
+                            @Localizer["RemoteWork"]
+                        </th>
+                    </tr>
+                    @{
+                        for (int i = 0; i < @Model.CityEpidemics.Count; i++)
+                        {
+                            <tr>
+                                <td style="display: none">
+                                    @Html.TextBoxFor(o => o.CityEpidemics[i].CityId, new { @readonly = true })
+                                </td>
+                                <td>
+                                    @Html.TextBoxFor(o => o.CityEpidemics[i].CityName, new { @readonly = true })
+                                </td>
+                                <td>
+                                    @Html.EditorFor(o => o.CityEpidemics[i].DiseaseStatistics[0].Sick, new { @class = "form-control" })
+                                </td>
+                                <td>
+                                    @Html.EditorFor(o => o.CityEpidemics[i].DiseaseStatistics[0].Injured, new { @class = "form-control" })
+                                </td>
+                                <td>
+                                    @Html.EditorFor(o => o.CityEpidemics[i].VaccinesDoneDayily, new { @class = "form-control" })
+                                </td>
+                                <td>
+                                    @Html.CheckBoxFor(o => o.CityEpidemics[i].Countermeasures.StopTransport)
+                                </td>
+                                <td>
+                                    @Html.CheckBoxFor(o => o.CityEpidemics[i].Countermeasures.CloseSchools)
+                                </td>
+                                <td>
+                                    @Html.CheckBoxFor(o => o.CityEpidemics[i].Countermeasures.CloseKinderGartens)
+                                </td>
+                                <td>
+                                    @Html.CheckBoxFor(o => o.CityEpidemics[i].Countermeasures.RemoteWork)
+                                </td>
+                            </tr>
+                        }
+                    }
+                </table>
+
+                @Html.HiddenFor(o => o.Id)
+                @Html.HiddenFor(o => o.DiseaseId)
+                @Html.HiddenFor(o => o.CountryId)
+                @Html.HiddenFor(o => o.DayFromStart)
+            </div>
+        </div>
+        <hr />
+        <div class="form-group">
+            <div class="text-center">
+                <button class="btn btn-primary" asp_controller="EpidemicSpread" asp-action="Index">@Localizer["NextStep"]</button>
+            </div>
+        </div>
+    </div>
+}
+

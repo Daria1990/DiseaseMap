@@ -1,0 +1,74 @@
+﻿@inject IViewLocalizer Localizer
+@addTagHelper *, Microsoft.AspNetCore.Mvc.TagHelpers
+
+@model CountryEpidemic
+
+@{
+    ViewData["Title"] = "Distribution Statistics";
+}
+
+<link href="~/css/myStyles/table.css" rel="stylesheet" />
+
+
+<div>
+    <div>
+        <div class="col-md-12">
+            <div class="text-center">
+                <h3 class="badge badge-info">@Model.DayFromStart @Localizer["Header"]</h3>
+            </div>
+
+            <table class="table table-condensed table-hover">
+                <tr>
+                    <th>
+                        @Localizer["CityName"]
+                    </th>
+                    <th>
+                        @Localizer["Sick"]
+                    </th>
+                    <th>
+                        @Localizer["Recovered"]
+                    </th>
+                    <th>
+                        @Localizer["Injured"]
+                    </th>
+                    <th>
+                        @Localizer["Dead"]
+                    </th>
+                </tr>
+                @{
+                    var dayOfDisease = Model.DayFromStart;
+                    for (var i = 0; i < Model.CityEpidemics.Count; i++)
+                    {
+                        <tr>
+                            <td>
+                                @Html.ValueFor(o => o.CityEpidemics[i].CityName)
+                            </td>
+                            <td>
+                                @Html.ValueFor(o => o.CityEpidemics[i].DiseaseStatistics[dayOfDisease - 1].Sick)
+                            </td>
+                            <td>
+                                @Html.ValueFor(o => o.CityEpidemics[i].DiseaseStatistics[dayOfDisease - 1].Recovered)
+                            </td>
+                            <td>
+                                @Html.ValueFor(o => o.CityEpidemics[i].DiseaseStatistics[dayOfDisease - 1].Injured)
+                            </td>
+                            <td>
+                                @Html.ValueFor(o => o.CityEpidemics[i].DiseaseStatistics[dayOfDisease - 1].Dead)
+                            </td>
+                        </tr>
+                    }
+                }
+            </table>
+        </div>
+    </div>
+    <hr />
+    <div>
+        <div class="text-center">
+            <a class="btn btn-primary" asp_controller="EpidemicSpread" asp-action="GoToPreviousStep" 
+               asp-route-countryEpidemicId=@Model.Id asp-route-currentDay=@Model.DayFromStart>@Localizer["PreviousStep"]
+            </a>
+            <a class="btn btn-primary" asp_controller="EpidemicSpread" asp-action="GoToNextStep" 
+               asp-route-countryEpidemicId=@Model.Id asp-route-currentDay=@Model.DayFromStart>@Localizer["NextStep"]</a>
+        </div>
+    </div>
+</div>

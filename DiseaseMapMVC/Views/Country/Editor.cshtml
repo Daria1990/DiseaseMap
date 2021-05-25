@@ -1,0 +1,33 @@
+﻿@inject IViewLocalizer Localizer
+
+@model CountryViewModel;
+
+<link href="~/css/myStyles/errorMessage.css" rel="stylesheet" />
+
+<script src="https://stackpath.bootstrapcdn.com/bootstrap/4.5.2/js/bootstrap.min.js"></script>
+<script src="~/lib/jquery-validation/dist/jquery.validate.min.js"></script>
+<script src="~/lib/jquery-validation-unobtrusive/jquery.validate.unobtrusive.min.js"></script>
+
+@using (Html.BeginForm("Save", "Country", FormMethod.Post, new { @class = "modal-content form-horizontal", role = "form" }))
+{
+    <div class="modal-header">
+        <h4>@Localizer["CountryParameters"]</h4>
+        <button class="close" data-dismiss="modal" area-hidden="true">X</button>
+    </div>
+    <hr />
+
+    @Html.HiddenFor(model => model.Id)
+
+    <div class="form-group">
+        @Html.LabelFor(m => m.Name, new { @class = "col-md-6 control-label" })
+        @Html.ValidationMessageFor(m => m.Name)
+        <div class="col-md-10">
+            @Html.TextBoxFor(m => m.Name, new { @class = "form-control" })
+        </div>
+    </div>
+    <div class="form-group">
+        <div class="col-md-offset-2 col-md-10">
+            <input type="submit" class="btn btn-success btn-default" value='@Localizer["Save"]'/>
+        </div>
+    </div>
+}

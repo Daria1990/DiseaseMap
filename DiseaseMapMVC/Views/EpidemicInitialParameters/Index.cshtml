@@ -1,0 +1,36 @@
+﻿@{
+    ViewData["Title"] = "Epidemic";
+}
+
+@model EpidemicViewModel
+
+@inject IViewLocalizer Localizer
+
+<link href="~/css/myStyles/errorMessage.css" rel="stylesheet" />
+
+<script src="https://stackpath.bootstrapcdn.com/bootstrap/4.5.2/js/bootstrap.min.js"></script>
+<script src="~/lib/jquery-validation/dist/jquery.validate.min.js"></script>
+<script src="~/lib/jquery-validation-unobtrusive/jquery.validate.unobtrusive.min.js"></script>
+
+@using (Html.BeginForm("SetCityParameters", "EpidemicInitialParameters", FormMethod.Post, new { id = "editForm", @class = "col-md-8 offset-md-2 modal-content form-horizontal", role = "form" }))
+{
+    <div class="form-group">
+        @Html.LabelFor(m => m.DiseaseId, new { @class = "col-md-4 offset-md-2 control-label" })
+        <select asp-for="DiseaseId" asp-items="ViewBag.Diseases">
+            <option selected="selected" disabled="disabled">@Localizer["SetDisease"]</option>
+        </select>
+        @Html.ValidationMessageFor(m => m.DiseaseId)
+    </div>
+    <div class="form-group">
+        @Html.LabelFor(m => m.CountryId, new { @class = "col-md-4 offset-md-2 control-label" })
+        <select asp-for="CountryId" asp-items="ViewBag.Countries">
+            <option selected="selected" disabled="disabled">@Localizer["SetCountry"]</option>
+        </select>
+        @Html.ValidationMessageFor(m => m.CountryId)
+    </div>
+    <div class="form-group">
+        <div class="offset-md-5">
+            <input type="submit" class="btn btn-primary" value="@Localizer["SetParameters"]" />
+        </div>
+    </div>
+}

@@ -1,0 +1,11 @@
+﻿@inject IViewLocalizer Localizer
+
+<link href="~/css/myStyles/errorPage.css" rel="stylesheet" />
+
+<div class="parent">
+    <div class="block">
+        <img src="~/images/error404.png" alt="error" />
+        <h1>@Localizer["NotFound"]</h1>
+        <h2>@Localizer["WrongUrl"]</h2>
+    </div>
+</div>

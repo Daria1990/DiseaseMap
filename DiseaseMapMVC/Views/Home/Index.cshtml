@@ -1,0 +1,11 @@
+﻿@{
+    ViewData["Title"] = "Home Page";
+}
+
+@inject IViewLocalizer Localizer
+
+<div class="text-center">
+    <h1 class="display-4">@Localizer["Intruduction"]</h1>
+    <h2><a asp_controller="Home" asp-action="CalcEpidemicSpread">@Localizer["CalcEpidemicSpread"]</a></h2>
+    <h2><a asp_controller="Home" asp-action="SetCountryParameters">@Localizer["SetCountryParameters"]</a></h2>
+</div>

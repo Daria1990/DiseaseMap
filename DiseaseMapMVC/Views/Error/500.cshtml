@@ -1,0 +1,11 @@
+﻿@inject IViewLocalizer Localizer
+
+<link href="~/css/myStyles/errorPage.css" rel="stylesheet" />
+
+<div class="parent">
+    <div class="block">
+        <img src="~/images/error500.png" alt="error" />
+        <h1>@Localizer["ServerError"]</h1>
+        <h2>@Localizer["Advice"]</h2>
+    </div>
+</div>
