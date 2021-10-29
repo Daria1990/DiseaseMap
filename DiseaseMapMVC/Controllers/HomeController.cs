@@ -15,6 +15,9 @@ using DiseaseMongoModel;
 
 namespace DiseaseMapMVC.Controllers
 {
+    /// <summary>
+    /// Контроллер заглавной страницы
+    /// </summary>
     public class HomeController : Controller
     {
         public IActionResult Index()

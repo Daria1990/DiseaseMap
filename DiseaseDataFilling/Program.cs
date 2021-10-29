@@ -20,16 +20,20 @@ namespace DiseaseDataFilling
             }
         }
 
+        /// <summary>
+        /// Метод получет строку соединения с базой данных
+        /// </summary>
+        /// <returns>строка подключния к БД</returns>
         static string GetDatabaseConnectionString()
         {
-            Console.WriteLine($"Write database connection string, value by default is {ConstantValues.DEFAULT_CONNECTION_STRING}");
+            Console.WriteLine($"Write database connection string, value by default is {ConstantValues.DefaultConnectionString}");
             Console.WriteLine("If you need value by default press ENTER");
 
             var connectionString = Console.ReadLine();
 
             if (string.IsNullOrEmpty(connectionString))
             {
-                return ConstantValues.DEFAULT_CONNECTION_STRING;
+                return ConstantValues.DefaultConnectionString;
             }
             else
             {

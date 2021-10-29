@@ -8,18 +8,32 @@ using DiseaseMapMVC.Models.ViewModels;
 using DiseaseMongoModel;
 using Newtonsoft.Json;
 using JqueryDataTables.ServerSide.AspNetCoreWeb.Models;
+using DiseaseMapMVC.Resources.Models;
 
 namespace DiseaseMapMVC.Controllers
 {
+    /// <summary>
+    /// Контроллер грида стран
+    /// </summary>
     public class CountryController : DataTableController
     {
-        private MongoDbRepository<Country> _countryRepository;
+        /// <summary>
+        /// Репозиторий стран
+        /// </summary>
+        private MongoDbRepository<Country> _СountryRepository;
 
-        private readonly CountryMongoToViewModelConverter<Country, CountryViewModel> _countryConverter = new CountryMongoToViewModelConverter<Country, CountryViewModel>();
+        /// <summary>
+        /// Конвертер модели представления страны в сущность для работы с базой Mongo
+        /// </summary>
+        private CountryMongoToViewModelConverter<Country, CountryViewModel> _СountryConverter = new CountryMongoToViewModelConverter<Country, CountryViewModel>();
 
+        /// <summary>
+        /// Конструктор класса
+        /// </summary>
+        /// <param name="context">контекст Mongo</param>
         public CountryController(MongoContext context)
         {
-            _countryRepository = new MongoDbRepository<Country>(context);
+            _СountryRepository = new MongoDbRepository<Country>(context);
         }
 
         public IActionResult Index()
@@ -27,14 +41,23 @@ namespace DiseaseMapMVC.Controllers
             return View();
         }
 
+        /// <summary>
+        /// Метод загружает грид стран
+        /// </summary>
+        /// <returns></returns>
         [HttpPost]
         public IActionResult Load()
         {
-            var data = GetCountries();
+            var data = GetSearchCountries();
 
             return GetJsonResult<Country>(data);
         }
 
+        /// <summary>
+        /// Метод обрабатывает нажатие кнопки Сохранить при создании или редактировании стран
+        /// </summary>
+        /// <param name="countryViewModel">модель страны, которую необходимо создать или отредактировать</param>
+        /// <returns></returns>
         public IActionResult Save(CountryViewModel countryViewModel)
         {
             if (ModelState.IsValid)
@@ -43,17 +66,17 @@ namespace DiseaseMapMVC.Controllers
 
                 if (!string.IsNullOrEmpty(countryViewModel.Id))
                 {
-                    var editCountry = _countryRepository.GetById(countryViewModel.Id);
+                    var editCountry = _СountryRepository.GetById(countryViewModel.Id);
 
-                    editCountry = _countryConverter.Convert(countryViewModel, editCountry);
+                    _СountryConverter.Convert(countryViewModel, editCountry);
 
-                    changeSuccess = _countryRepository.Update(editCountry);
+                    changeSuccess = _СountryRepository.Update(editCountry);
                 }
                 else
                 {
-                    var country = _countryConverter.Convert(countryViewModel);
+                    var country = _СountryConverter.Convert(countryViewModel);
 
-                    changeSuccess = _countryRepository.Create(country);
+                    changeSuccess = _СountryRepository.Create(country);
                 }
 
                 if (changeSuccess)
@@ -62,49 +85,68 @@ namespace DiseaseMapMVC.Controllers
                 }
                 else
                 {
-                    return Content("error");
+                    return Content(ErrorMessages.SaveCountryError);
                 }
             }
             else
                 return PartialView("Editor", countryViewModel);
         }
 
+        /// <summary>
+        /// Метод открывает диалоговое окно для создания страны
+        /// </summary>
+        /// <returns></returns>
         public IActionResult Add()
         {
             return PartialView("Editor");
         }
 
+        /// <summary>
+        /// Метод редактирует выбранную запись страны
+        /// </summary>
+        /// <param name="id">id страны, которая будет редактироваться</param>
+        /// <returns></returns>
         public IActionResult Edit(string id)
         {
-            var editCountry = _countryRepository.GetById(id);
+            var editCountry = _СountryRepository.GetById(id);
 
             if (editCountry != null)
-                return PartialView("Editor", _countryConverter.Convert(editCountry));
+            {
+                return PartialView("Editor", _СountryConverter.Convert(editCountry));
+            }
 
-            return Content("ErrorPage");
+            return Content(ErrorMessages.ErrorPage);
         }
 
+        /// <summary>
+        /// Метод удаляет выбранную запись страны
+        /// </summary>
+        /// <param name="id">id страны, которую необходимо удалить</param>
+        /// <returns></returns>
         [HttpPost]
         public IActionResult Delete(string id)
         {
-            var deletedCountry = _countryRepository.GetById(id);
+            var deletedCountry = _СountryRepository.GetById(id);
 
             if (deletedCountry != null)
             {
-                _countryRepository.Delete(deletedCountry);
+                _СountryRepository.Delete(deletedCountry);
             }
 
-            var data = GetCountries();
+            var data = GetSearchCountries();
 
             return GetJsonResult<Country>(data);
         }
-
-        private IEnumerable<Country> GetCountries()
+        
+        /// <summary>
+        /// Метод получает список записей, исходя из значения, введеного в строку поиска
+        /// </summary>
+        /// <returns>список записей</returns>
+        private IEnumerable<Country> GetSearchCountries()
         {
-            // Search Value from (Search box)  
             var searchValue = GetSearchValue();
 
-            return _countryRepository.SearchFor(e => e.Name.ToLower().Contains(searchValue));
+            return _СountryRepository.SearchFor(e => e.Name.ToLower().Contains(searchValue));
         }
     }
 }

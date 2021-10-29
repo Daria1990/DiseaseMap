@@ -11,6 +11,9 @@ namespace DiseaseMongoModel
     /// </summary>
     public class Vaccine
     {
+        /// <summary>
+        /// Наименование
+        /// </summary>
         public string Name { get; set; }
 
         /// <summary>

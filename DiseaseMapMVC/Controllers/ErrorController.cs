@@ -6,6 +6,9 @@ using System.Threading.Tasks;
 
 namespace DiseaseMapMVC.Controllers
 {
+    /// <summary>
+    /// Контроллер страницы ошибок
+    /// </summary>
     public class ErrorController : Controller
     {
         [HttpGet("/Error/{statusCode}")]

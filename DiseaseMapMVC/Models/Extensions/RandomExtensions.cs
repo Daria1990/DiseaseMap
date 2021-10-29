@@ -5,6 +5,9 @@ using System.Threading.Tasks;
 
 namespace DiseaseMapMVC.Models.Extensions
 {
+    /// <summary>
+    /// Класс расширения Random
+    /// </summary>
     public static class RandomExtensions
     {
         public static double NextDouble(this Random random, double minValue, double maxValue)

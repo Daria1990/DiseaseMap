@@ -6,20 +6,40 @@ using System.Threading.Tasks;
 
 namespace DiseaseMongoModel
 {
+    /// <summary>
+    /// Класс контекста Mongo
+    /// </summary>
     public class MongoContext
     {
-        private IMongoDatabase database;
+        /// <summary>
+        /// База данных в Mongo
+        /// </summary>
+        private IMongoDatabase _Database;
 
+        /// <summary>
+        /// Конструктор класса
+        /// </summary>
+        /// <param name="connectionString">строка подключения</param>
         public MongoContext(string connectionString)
         {
-            database = GetDatabase(connectionString);
+            _Database = GetDatabase(connectionString);
         }
 
+        /// <summary>
+        /// Метод получает данные из таблицы Mongo
+        /// </summary>
+        /// <typeparam name="TEntity">тип сущности, для которого надо получить данные</typeparam>
+        /// <returns>данные из таблицы</returns>
         public IMongoCollection<TEntity> GetCollection<TEntity>() where TEntity : BaseEntity
         {
-            return database.GetCollection<TEntity>(typeof(TEntity).Name);
+            return _Database.GetCollection<TEntity>(typeof(TEntity).Name);
         }
 
+        /// <summary>
+        /// Метод получает базу данных в Mongo
+        /// </summary>
+        /// <param name="connectionString">строка подключения к Mongo</param>
+        /// <returns>база данных</returns>
         private IMongoDatabase GetDatabase(string connectionString)
         {
             var connection = new MongoUrlBuilder(connectionString);

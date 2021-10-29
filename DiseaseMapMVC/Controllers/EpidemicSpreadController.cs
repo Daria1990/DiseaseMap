@@ -8,30 +8,77 @@ using Microsoft.AspNetCore.Mvc.Rendering;
 using DiseaseMongoModel;
 using MongoDB.Bson;
 using DiseaseMapMVC.Models.Disease;
-using DiseaseMapMVC.Models.Repositories;
+using DiseaseMapMVC.Models.Cache;
 using Microsoft.Extensions.Caching.Memory;
 using DiseaseMapMVC.Models;
 using Microsoft.AspNetCore.Http;
+using DiseaseMapMVC.Models.Epidemic;
 
 namespace DiseaseMapMVC.Controllers
 {
+    /// <summary>
+    /// Контроллер рассчета распространения заболевания
+    /// </summary>
     public class EpidemicSpreadController : Controller
     {
-        private CacheRepository<City> _cityRepository;
+        /// <summary>
+        /// Фабрика создания классов для рассчета распространения заболевания
+        /// </summary>
+        private IDiseaseSpreadFactory _DiseaseSpreadFactory;
 
-        private CacheRepository<Disease> _diseaseRepository;
+        /// <summary>
+        /// Рассчет статистики заболеваемости
+        /// </summary>
+        private IDiseaseStatisticCalculator _DiseaseStatisticCalculator;
 
-        private CacheRepository<CountryEpidemic> _countryEpidemicRepository;
+        /// <summary>
+        /// Устанановка значения полей для эпидемии
+        /// </summary>
+        private ICountryEpidemicParameterSetter _CountryEpidemicParameterSetter;
 
-        public EpidemicSpreadController(IMemoryCache memoryCache, MongoContext context)
+        /// <summary>
+        /// Репозиторий городов
+        /// </summary>
+        private CacheRepository<City> _CityCacheRepository;
+
+        /// <summary>
+        /// Репоиторий болезней
+        /// </summary>
+        private CacheRepository<Disease> _DiseaseCacheRepository;
+
+        /// <summary>
+        /// Репозиторий стран
+        /// </summary>
+        private CacheRepository<CountryEpidemic> _CountryEpidemicCacheRepository;
+
+        /// <summary>
+        /// Конструктор класса
+        /// </summary>
+        /// <param name="memoryCacheWrapper">обертка для кеширования на сервере</param>
+        /// <param name="context"></param>
+        /// <param name="diseaseSpreadFactory">Фабрика создания классов для рассчета распространения заболевания</param>
+        /// <param name="diseaseStatisticCalculator">Рассчет статистики заболеваемости</param>
+        /// <param name="countryEpidemicParameterSetter">Устанановка значения полей для эпидемии</param>
+        public EpidemicSpreadController(IMemoryCacheWrapper memoryCacheWrapper, MongoContext context, IDiseaseSpreadFactory diseaseSpreadFactory,
+                                IDiseaseStatisticCalculator diseaseStatisticCalculator, ICountryEpidemicParameterSetter countryEpidemicParameterSetter)
         {
-            var memoryCacheWrapper = new MemoryCacheWrapper(memoryCache);
+            if (memoryCacheWrapper == null)
+            {
+                throw new ArgumentNullException(nameof(memoryCacheWrapper));
+            }
 
-            _cityRepository = new CacheRepository<City>(memoryCacheWrapper, new MongoDbRepository<City>(context));
+            if (context == null)
+            {
+                throw new ArgumentNullException(nameof(context));
+            }
 
-            _diseaseRepository = new CacheRepository<Disease>(memoryCacheWrapper, new MongoDbRepository<Disease>(context));
+            _CityCacheRepository = new CacheRepository<City>(memoryCacheWrapper, new MongoDbRepository<City>(context));
+            _DiseaseCacheRepository = new CacheRepository<Disease>(memoryCacheWrapper, new MongoDbRepository<Disease>(context));
+            _CountryEpidemicCacheRepository = new CacheRepository<CountryEpidemic>(memoryCacheWrapper, new MongoDbRepository<CountryEpidemic>(context));
 
-            _countryEpidemicRepository = new CacheRepository<CountryEpidemic>(memoryCacheWrapper, new MongoDbRepository<CountryEpidemic>(context));
+            _DiseaseSpreadFactory = diseaseSpreadFactory ?? throw new ArgumentNullException(nameof(diseaseSpreadFactory));
+            _DiseaseStatisticCalculator = diseaseStatisticCalculator ?? throw new ArgumentNullException(nameof(diseaseStatisticCalculator));
+            _CountryEpidemicParameterSetter = countryEpidemicParameterSetter ?? throw new ArgumentNullException(nameof(countryEpidemicParameterSetter));
         }
 
         [HttpGet]
@@ -39,14 +86,19 @@ namespace DiseaseMapMVC.Controllers
         {
             if (string.IsNullOrEmpty(countryEpidemicId))
             {
-                countryEpidemicId = GetDataFromHttpContext(ConstantValues.SessionKey.COUNTRY_EPIDEMIC_ID_KEY);
+                countryEpidemicId = GetDataFromHttpContext(ConstantValues.CountryEpidemicSessionKey);
             }
 
-            var countryEpidemic = _countryEpidemicRepository.GetById(countryEpidemicId);
+            var countryEpidemic = _CountryEpidemicCacheRepository.GetById(countryEpidemicId);
 
             return View(countryEpidemic);
         }
-
+        
+        /// <summary>
+        /// Метод получает данные из сессии по ключу
+        /// </summary>
+        /// <param name="key">ключ</param>
+        /// <returns>значение из сессии</returns>
         private string GetDataFromHttpContext(string key)
         {
             var value = HttpContext.Session.GetString(key);
@@ -64,20 +116,31 @@ namespace DiseaseMapMVC.Controllers
         [HttpPost]
         public IActionResult Index(CountryEpidemic countryEpidemic)
         {
-            _countryEpidemicRepository.Update(countryEpidemic);
+            _CountryEpidemicCacheRepository.Update(countryEpidemic);
 
             return View("DistributionStatistics", countryEpidemic);
         }
 
-
+        /// <summary>
+        /// Метод вызывается при нажатии на кнопку PreviousStep
+        /// </summary>
+        /// <param name="countryEpidemicId">Id эпидемии</param>
+        /// <param name="currentDay">День от начала эпидемии</param>
+        /// <returns></returns>
         [HttpGet]
         public IActionResult GoToPreviousStep(string countryEpidemicId, int currentDay)
         {
-            var countryEpidemic = _countryEpidemicRepository.GetById(countryEpidemicId);
+            var countryEpidemic = _CountryEpidemicCacheRepository.GetById(countryEpidemicId);
 
             if (currentDay > 1)
             {
-                DeleteLastStatistic(countryEpidemic);
+                // удаляем статистику за последний день эпидемии
+                var lastStatisticNumber = countryEpidemic.DayFromStart - 1;
+
+                for (int i = 0; i < countryEpidemic.CityEpidemics.Count; i++)
+                {
+                    countryEpidemic.CityEpidemics[i].DiseaseStatistics.RemoveAt(lastStatisticNumber);
+                };
 
                 countryEpidemic.DayFromStart = currentDay - 1;
 
@@ -85,36 +148,31 @@ namespace DiseaseMapMVC.Controllers
             }
             else
             {
-                var parameterSetter = new CountryEidemicParameterSetter(countryEpidemic);
                 //рассчитываем все заново
-                countryEpidemic = parameterSetter.SetCities();
+                _CountryEpidemicParameterSetter.ResetCities(countryEpidemic);
 
-                _countryEpidemicRepository.Update(countryEpidemic);
+                _CountryEpidemicCacheRepository.Update(countryEpidemic);
 
                 return View("Index", countryEpidemic);
             }
         }
 
-        
-        private void DeleteLastStatistic(CountryEpidemic countryEpidemic)
-        {
-            var lastStatisticNumber = countryEpidemic.DayFromStart - 1;
-
-            for (int i = 0; i < countryEpidemic.CityEpidemics.Count; i++)
-            {
-                countryEpidemic.CityEpidemics[i].DiseaseStatistics.RemoveAt(lastStatisticNumber);
-            }
-        }
-
+        /// <summary>
+        /// Метод вызывается при нажатии на кнопку NextStep
+        /// </summary>
+        /// <param name="countryEpidemicId">Id эпидемии</param>
+        /// <param name="currentDay">День от начала эпидемии</param>
+        /// <returns></returns>
         [HttpGet]
         public IActionResult GoToNextStep(string countryEpidemicId, int currentDay)
         {
-            var countryEpidemic = _countryEpidemicRepository.GetById(countryEpidemicId);
+            var countryEpidemic = _CountryEpidemicCacheRepository.GetById(countryEpidemicId);
 
             if (currentDay == countryEpidemic.DayFromStart)
             {
-                GetCurrentCountryEpidemic(countryEpidemic);
-                _countryEpidemicRepository.Update(countryEpidemic);
+                GetDiseaseStatisticForToday(countryEpidemic);
+
+                _CountryEpidemicCacheRepository.Update(countryEpidemic);
             }
             else
             {
@@ -124,35 +182,26 @@ namespace DiseaseMapMVC.Controllers
             return View("DistributionStatistics", countryEpidemic);
         }
 
-        private void GetCurrentCountryEpidemic(CountryEpidemic countryEpidemic)
+        /// <summary>
+        /// Метод рассчитывает статистику распространения заболевания для сегодняшнего дня
+        /// </summary>
+        /// <param name="countryEpidemic">эпидемия с стране</param>
+        private void GetDiseaseStatisticForToday(CountryEpidemic countryEpidemic)
         {
-            var disease = _diseaseRepository.GetById(countryEpidemic.DiseaseId);
+            var disease = _DiseaseCacheRepository.GetById(countryEpidemic.DiseaseId);
 
             foreach (var cityEpidemic in countryEpidemic.CityEpidemics)
             {
-                var todaysStatistic = GetTodayCityEpidemicStatistic(cityEpidemic, disease);
+                var city = _CityCacheRepository.GetById(cityEpidemic.CityId.ToString());
+
+                var diseaseCitySpread = _DiseaseSpreadFactory.Create(disease, cityEpidemic.DiseaseStatistics, city.Population.PeopleNumber);
+
+                var todaysStatistic = _DiseaseStatisticCalculator.CalculateForToday(diseaseCitySpread, cityEpidemic, city); 
+
                 cityEpidemic.DiseaseStatistics.Add(todaysStatistic);
             }
 
             countryEpidemic.DayFromStart += 1;
-        }
-
-        private DiseaseStatistic GetTodayCityEpidemicStatistic(CityEpidemic cityEpidemic, Disease disease)
-        {
-            var city = _cityRepository.GetById(cityEpidemic.CityId.ToString());
-
-            var diseaseCitySpread = GetDiseaseSpread(disease, cityEpidemic.DiseaseStatistics, city.Population.PeopleNumber);
-
-            var diseaseStatisticCreator = new DiseaseStatisticCreator();
-
-            return diseaseStatisticCreator.CreateForToday(diseaseCitySpread, cityEpidemic, city);
-        }
-
-        private DiseaseCitySpread GetDiseaseSpread(Disease disease, List<DiseaseStatistic> diseaseStatistics, int cityPeopleNumber)
-        {
-            var diseaseSpreadCreator = new DiseaseSpreadCreator();
-
-            return diseaseSpreadCreator.CreateForCity(disease, diseaseStatistics, cityPeopleNumber);
         }
     }
 }

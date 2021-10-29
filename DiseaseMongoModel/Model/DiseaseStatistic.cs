@@ -5,6 +5,9 @@ using System.Threading.Tasks;
 
 namespace DiseaseMongoModel
 {
+    /// <summary>
+    /// Статистика эпидемии
+    /// </summary>
     public class DiseaseStatistic
     {
         /// <summary>

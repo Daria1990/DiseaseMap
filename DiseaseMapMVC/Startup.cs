@@ -15,6 +15,9 @@ using Microsoft.AspNetCore.Localization;
 using Newtonsoft.Json;
 using Newtonsoft.Json.Serialization;
 using DiseaseMongoModel;
+using DiseaseMapMVC.Models.Cache;
+using DiseaseMapMVC.Models.Disease;
+using DiseaseMapMVC.Models.Epidemic;
 
 namespace DiseaseMapMVC
 {
@@ -30,6 +33,13 @@ namespace DiseaseMapMVC
         // This method gets called by the runtime. Use this method to add services to the container.
         public void ConfigureServices(IServiceCollection services)
         {
+            services.AddTransient<IMemoryCacheWrapper, MemoryCacheWrapper>();
+            services.AddTransient<IDiseaseStatisticCalculator, DiseaseStatisticCalculator>();
+            services.AddTransient<IMeasuresEfficiency, MeasuresEfficiency>();
+            services.AddTransient<IVaccinationCompany, VaccinationCompany>();
+            services.AddTransient<IDiseaseSpreadFactory, DiseaseSpreadFactory>();
+            services.AddTransient<ICountryEpidemicParameterSetter, CountryEpidemicParameterSetter>();
+
             services.AddTransient<MongoContext>(context =>
             {
                 string connectionString = Configuration.GetConnectionString("MongoConnection");

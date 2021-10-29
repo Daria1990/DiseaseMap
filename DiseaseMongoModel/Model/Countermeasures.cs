@@ -9,12 +9,24 @@ namespace DiseaseMongoModel
     /// </summary>
     public class Countermeasures
     {
+        /// <summary>
+        /// Закрыть детские сады
+        /// </summary>
         public bool CloseKinderGartens { get; set; }
 
+        /// <summary>
+        /// Закрыть школы
+        /// </summary>
         public bool CloseSchools { get; set; }
 
+        /// <summary>
+        /// Перевести всех на удаленную работу
+        /// </summary>
         public bool RemoteWork { get; set; }
 
+        /// <summary>
+        /// Остановить работу транспорта
+        /// </summary>
         public bool StopTransport { get; set; }
 
         /// <summary>

@@ -6,21 +6,27 @@ using System.Text;
 
 namespace DiseaseDataFilling.DataFilling
 {
+    /// <summary>
+    /// Класс заполнения базы данных Mongo данными
+    /// </summary>
     public class MongoDataFilling
     {
+        /// <summary>
+        /// Метод заполняет заданную базу данных данными
+        /// </summary>
+        /// <param name="connectionString">строка подключения к базе данных</param>
         public void FillDiseaseDb(string connectionString)
         {
-            var mongoContext = CreateMongoContext(connectionString);
+            var mongoContext = new MongoContext(connectionString);
 
             CreateCountries(mongoContext);
             CreateDiseasies(mongoContext);
         }
 
-        public MongoContext CreateMongoContext(string connectionString)
-        {
-            return new MongoContext(connectionString);
-        }
-
+        /// <summary>
+        /// Метод создает страны с городами в базе данных Mongo
+        /// </summary>
+        /// <param name="mongoContext">контекст подключения базы данных Mongo</param>
         private void CreateCountries(MongoContext mongoContext)
         {
             var repositoryCountry = new MongoDbRepository<Country>(mongoContext);
@@ -153,6 +159,10 @@ namespace DiseaseDataFilling.DataFilling
             #endregion США
         }
 
+        /// <summary>
+        /// Метод создает болезни и связанные с ними данные в базе данных Mongo
+        /// </summary>
+        /// <param name="mongoContext">контекст подключения базы данных Mongo</param>
         private void CreateDiseasies(MongoContext mongoContext)
         {
             var repository = new MongoDbRepository<Disease>(mongoContext);

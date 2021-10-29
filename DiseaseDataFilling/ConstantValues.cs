@@ -4,8 +4,14 @@ using System.Text;
 
 namespace DiseaseDataFilling
 {
-    public static class ConstantValues
+    /// <summary>
+    /// Класс, содержащий константы
+    /// </summary>
+    public class ConstantValues
     {
-        public const string DEFAULT_CONNECTION_STRING = "mongodb://localhost:27017/DiseaseMap";
+        /// <summary>
+        /// Строка подлючения к базе по умолчанию
+        /// </summary>
+        public const string DefaultConnectionString = "mongodb://localhost:27017/DiseaseMap";
     }
 }

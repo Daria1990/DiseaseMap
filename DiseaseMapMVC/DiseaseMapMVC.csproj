@@ -18,4 +18,28 @@
     <ProjectReference Include="..\DiseaseMongoModel\DiseaseMongoModel.csproj" />
   </ItemGroup>
 
+  <ItemGroup>
+    <Compile Update="Resources\Models\DiseaseMKBMessages.Designer.cs">
+      <DependentUpon>DiseaseMKBMessages.resx</DependentUpon>
+      <DesignTime>True</DesignTime>
+      <AutoGen>True</AutoGen>
+    </Compile>
+    <Compile Update="Resources\Models\ErrorMessages.Designer.cs">
+      <DependentUpon>ErrorMessages.resx</DependentUpon>
+      <DesignTime>True</DesignTime>
+      <AutoGen>True</AutoGen>
+    </Compile>
+  </ItemGroup>
+
+  <ItemGroup>
+    <EmbeddedResource Update="Resources\Models\DiseaseMKBMessages.resx">
+      <LastGenOutput>DiseaseMKBMessages.Designer.cs</LastGenOutput>
+      <Generator>ResXFileCodeGenerator</Generator>
+    </EmbeddedResource>
+    <EmbeddedResource Update="Resources\Models\ErrorMessages.resx">
+      <LastGenOutput>ErrorMessages.Designer.cs</LastGenOutput>
+      <Generator>ResXFileCodeGenerator</Generator>
+    </EmbeddedResource>
+  </ItemGroup>
+
 </Project>

@@ -7,6 +7,9 @@ using System.Threading.Tasks;
 
 namespace DiseaseMongoModel
 {
+    /// <summary>
+    /// Вспомогательный класс для сущностей в Mongo
+    /// </summary>
     public abstract class BaseEntity
     {
         [BsonId]
